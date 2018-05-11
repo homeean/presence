@@ -1,0 +1,27 @@
+{
+  "name": "homeean-presence",
+  "version": "0.0.1",
+  "description": "presence detection for your smart home",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require babel-core/register"
+  },
+  "keywords": [
+    "presence"
+  ],
+  "author": "stfnhmplr <stfnhmplr@gmail.com> (http://himpler.com)",
+  "license": "MIT",
+  "dependencies": {
+    "bleacon": "^0.5.1",
+    "body-parser": "^1.18.2",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
+    "net-ping": "^1.2.1"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.1.1"
+  }
+}
