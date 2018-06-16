@@ -1,32 +1,72 @@
 const express = require('express')
-const server = express();
-const Person = require('./person');
+const bodyParser = require('body-parser');
+
 const debug = require('debug')('homeean-presence');
-var bodyParser = require('body-parser');
-const config = require('./config.js')
+const fs = require('fs')
+const os = require('os')
 
-server.use(bodyParser.text());
+const Person = require('./person')
 
-config.persons.forEach((p) => {
-    let person = new Person(p);
+class HomeeanPresence {
 
-    // setup webhook
-    server.post('/homeean-presence/' + person.name.toLowerCase(), (req, res) => {
-        debug('received state %s for %s', req.body, person.name);
-        if (req.body === 'on') {
-            person.last_seen = Date.now();
-        } else {
-            //TODO
+    constructor(config) {
+        this.config = config;
+        this.server = express();
+        this.server.use(bodyParser.text());
+    }
+
+    run() {
+        console.log('homeean-presence');
+        console.log('2018 by stfnhmplr | himpler.com');
+
+        debug('running on node %s', process.version)
+
+        if (typeof(this.config) != 'Object') {
+            this._loadConfig()
         }
 
-        res.send('received state %s for %s', req.body, this.name)
-    })
+        this._createPersons();
 
-    person.on('stateChanged', (name, state) => {
-        debug('%s is %s.', name, state ? 'present' : 'absent')
-    });
+        this.server.listen(this.config.port)
+    }
 
-    person.track(2000);
-})
+    _createPersons() {
+        this.config.persons.forEach((p) => {
+            let person = new Person(p);
 
-server.listen(config.port)
+            // setup webhook
+            this.server.post('/homeean-presence/' + person.name.toLowerCase(), (req, res) => {
+                debug('received state %s for %s', req.body, person.name);
+                if (req.body === 'on') {
+                    person.last_seen = Date.now();
+                } else {
+                    //TODO:
+                }
+
+                res.send('received state %s for %s', req.body, this.name)
+            })
+
+            person.on('stateChanged', (name, state) => {
+                debug('%s is %s.', name, state ? 'present' : 'absent')
+            });
+
+            person.track(2000);
+        })
+    }
+
+    _loadConfig() {
+        const path = os.homedir() + '/.homeean-presence/config.json';
+        debug('load config from %s', path)
+
+        try {
+            const file = fs.readFileSync(path, 'utf8')
+            this.config = JSON.parse(file);
+        } catch (e) {
+            debug('Could not find config or parse config file')
+            process.exit();
+        }
+    }
+}
+
+const homeeanPresence = new HomeeanPresence();
+homeeanPresence.run();

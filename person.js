@@ -4,7 +4,7 @@ const Bleacon = require('bleacon')
 const EventEmitter = require('events')
 const debug = require('debug')('homeean-presence')
 
-class person extends EventEmitter {
+class Person extends EventEmitter {
 
     constructor(config) {
         super();
@@ -12,6 +12,7 @@ class person extends EventEmitter {
         this.uuid = config.uuid || null;
         this.ip = config.ip || null;
         this.last_seen = 0;
+        this.last_device = null;
         this.threshold = 3; // 180
         this.last_state = false;
         this.current_state = false;
@@ -42,7 +43,7 @@ class person extends EventEmitter {
 
     /**
      * [uuid description]
-     * @return {[type]} [description]
+     * @return {string} [description]
      */
     get uuid() {
         return this._uuid;
@@ -121,7 +122,8 @@ class person extends EventEmitter {
         if (this.uuid) this._bleScan();
 
         setInterval(() => {
-            debug('%s last_seen: %d', this.name, this.last_seen);
+            debug('%s last_seen: %s [%s]',
+                this.name, this.last_seen ? new Date(this.last_seen).toISOString() : 'never', this.last_device);
             this.current_state = Date.now() < this.last_seen + this.threshold * 1000;
             if (this.current_state !== this.last_state) {
                 this.emit('stateChanged', this.name, this.current_state)
@@ -142,6 +144,7 @@ class person extends EventEmitter {
             session.pingHost (this.ip, (error, target) => {
                 if (!error) {
                     this.last_seen = Date.now();
+                    this.last_device = 'ip'
                 }
             });
         }, this.interval)
@@ -167,6 +170,7 @@ class person extends EventEmitter {
 //            debug('discovered device %s.', bleacon.uuid);
             if (bleacon.uuid === this.uuid) {
                 this.last_seen = Date.now();
+                this.last_device = 'bleacon'
             }
         });
     }
@@ -180,4 +184,4 @@ class person extends EventEmitter {
     }
 }
 
-module.exports = person;
+module.exports = Person;
