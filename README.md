@@ -16,14 +16,13 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
 see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/bleno#prerequisites)
 
-### clone repo and install
+### this package is available via npm
 ```
-git clone https://github.com/homeean/presence.git homeean-presence
-cd homeean-presence
-npm install
+npm install homeean-presence
 ```
 
 ### create a config.json in ~/homeean-presence
+You can add as many person as you wish.
 ```
 // config.json
 {
@@ -45,6 +44,11 @@ npm install
 ```
 
 ## run
+```
+homeean-presence
+```
+
+### debug mode
 ```
 DEBUG=homeean-presence homeean-presence
 ```
