@@ -13,7 +13,7 @@ class Person extends EventEmitter {
         this.ip = config.ip || null;
         this.last_seen = 0;
         this.last_device = null;
-        this.threshold = 3; // 180
+        this.timelock = 0;
         this.last_state = false;
         this.current_state = false;
 
@@ -65,6 +65,38 @@ class Person extends EventEmitter {
     }
 
     /**
+     *
+     * @returns {*}
+     */
+    getState() {
+        return this._current_state;
+    }
+
+    /**
+     *
+     * @param {Boolean} value
+     * @return {void}
+     */
+    setState(value) {
+        if (typeof value !== 'boolean') {
+            throw new Error('"state" must be of type boolean')
+        }
+
+        this._current_state = value;
+
+        if (value !== this.last_state) {
+            this.emit('stateChanged', this.name, value)
+            this.last_state = value;
+        }
+    }
+
+
+    setStateFor(value, duration) {
+        this.setState(value);
+        this.timelock = Date.now() + duration * 1000;
+    }
+
+    /**
      * [last_seen description]
      * @return {Number} [description]
      */
@@ -111,25 +143,28 @@ class Person extends EventEmitter {
 
     /**
      * start tracking of person
-     * @param  {Number} [interval=20000] [description]
-     * @return {void}                  [description]
+     * @param  {Number} [interval=20] check interval in seconds
+     * @param  {Number} [treshold=180] threshold before state change in seconds
+     * @return {void}
      */
-    track(interval = 20000) {
+    track(interval = 20, threshold = 180) {
         debug('start tracking for %s', this.name)
-        this.interval = interval;
+        this.interval = interval * 1000;
+        this.threshold = threshold * 1000;
 
         if (this.ip) this._ping();
         if (this.uuid) this._bleScan();
 
         setInterval(() => {
+            if (this.timelock > Date.now()) {
+                debug('timelock is active, no state updates until %s', new Date(this.timelock).toISOString());
+                return;
+            }
+
             debug('%s last_seen: %s [%s]',
                 this.name, this.last_seen ? new Date(this.last_seen).toISOString() : 'never', this.last_device);
-            this.current_state = Date.now() < this.last_seen + this.threshold * 1000;
-            if (this.current_state !== this.last_state) {
-                this.emit('stateChanged', this.name, this.current_state)
-                this.last_state = this.current_state;
-            }
-        }, 5000);
+            this.setState(Date.now() < this.last_seen + this.threshold);
+        }, this.interval);
     }
 
     /**
@@ -139,9 +174,7 @@ class Person extends EventEmitter {
      */
     _ping() {
         setInterval(() => {
-            //debug('[%s] ping %s', this.name, this.ip)
-
-            session.pingHost (this.ip, (error, target) => {
+            session.pingHost (this.ip, (error) => {
                 if (!error) {
                     this.last_seen = Date.now();
                     this.last_device = 'ip'
@@ -156,19 +189,19 @@ class Person extends EventEmitter {
      */
     _bleScan() {
         setInterval(() => {
-            //debug('Start BLE Scan for %s.', this.name);
-            Bleacon.startScanning(this.uuid.replace('-', '').toLowerCase());
+            // debug('Start BLE Scan for %s.', this.name);
+            Bleacon.startScanning(this.uuid.replace(/-/g, '').toLowerCase());
 
             setTimeout(() => {
-            //debug('Stop BLE Scan for %s.', this.name);
+            // debug('Stop BLE Scan for %s.', this.name);
                 Bleacon.stopScanning();
-            }, this.interval / 10);
+            }, this.interval / 2);
 
         }, this.interval)
 
         Bleacon.on('discover', (bleacon) => {
-//            debug('discovered device %s.', bleacon.uuid);
-            if (bleacon.uuid === this.uuid) {
+            if (bleacon.uuid === this.uuid.replace(/-/g, '').toLowerCase()) {
+                // debug('discovered device %s.', bleacon.uuid);
                 this.last_seen = Date.now();
                 this.last_device = 'bleacon'
             }
