@@ -1,7 +1,5 @@
 # homeean-presence
 
-***work-in-progress***
-
 homeean-presence provides a simple way to detect presence at your home. For each person an IP device in the same network and a BLE device can be monitored. In addition, the presence state of a person can be manually set for a certain time via webhook.
 
 If the status changes, a webhook can be triggered.
@@ -16,9 +14,9 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
 see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/bleno#prerequisites)
 
-### this package is available via npm
+### the package is available via npm
 ```
-npm install homeean-presence
+npm install -g homeean-presence --unsafe-perm
 ```
 
 ### create a config.json in ~/homeean-presence
