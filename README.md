@@ -16,13 +16,12 @@ see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/blen
 
 ### the package is available via npm
 ```
-npm install -g homeean-presence --unsafe-perm
+sudo npm install -g homeean-presence --unsafe-perm
 ```
 
 ### create a config.json in ~/homeean-presence
 You can add as many person as you wish.
 ```
-// config.json
 {
     "interval": 20,
     "threshold": 180,
