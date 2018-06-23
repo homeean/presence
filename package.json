@@ -17,7 +17,8 @@
     "body-parser": "^1.18.2",
     "debug": "^3.1.0",
     "express": "^4.16.3",
-    "net-ping": "^1.2.1"
+    "net-ping": "^1.2.1",
+    "request": "^2.87.0"
   },
   "devDependencies": {
     "babel": "^6.23.0",

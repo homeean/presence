@@ -157,12 +157,18 @@ class Person extends EventEmitter {
 
         setInterval(() => {
             if (this.timelock > Date.now()) {
-                debug('timelock is active, no state updates until %s', new Date(this.timelock).toISOString());
+                debug('%s: timelock is active, no state updates until %s',
+                    this.name,
+                    new Date(this.timelock).toISOString()
+                );
                 return;
             }
 
-            debug('%s last_seen: %s [%s]',
-                this.name, this.last_seen ? new Date(this.last_seen).toISOString() : 'never', this.last_device);
+            debug('%s: last_seen: %s [%s]',
+                this.name,
+                this.last_seen ? new Date(this.last_seen).toISOString() : 'never',
+                this.last_device
+            );
             this.setState(Date.now() < this.last_seen + this.threshold);
         }, this.interval);
     }

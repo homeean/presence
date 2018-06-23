@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser');
-const https = require('https');
+const request = require('request');
 const debug = require('debug')('homeean-presence');
 const fs = require('fs')
 const os = require('os')
@@ -70,11 +70,16 @@ class HomeeanPresence extends EventEmitter {
 
         if ('webhooks' in this.config) {
             debug('%s @home, triggering webhook for %s', state ? 'somebody' : 'nobody', state ? 'presence' : 'absence');
-            https.get(state ? this.config.webhooks.present : this.config.webhooks.absent, (res) => {
-                debug('received status %s', res.statusCode)
-            }).on('error', (err) => {
-                debug('Error triggering webhook: %s', err);
-            })
+            let webhook = this.config.webhooks[state ? 'present' : 'absent'];
+
+            if (!webhook) {
+                debug('please specify an "%s" webhook in your config file', [state ? 'present' : 'absent'])
+                return;
+            }
+
+            request.get(webhook)
+                .on('response', res => { debug('received status %s', res.statusCode) })
+                .on('error', err => { debug('Error triggering webhook: %s', err) })
         }
     }
 
