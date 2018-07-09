@@ -55,10 +55,10 @@ class Person extends EventEmitter {
      * @return {void}       [description]
      */
     set uuid(value) {
-        const pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        const pattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
 
         if(!pattern.test(value) && value !== null) {
-            throw new Error('"uuid" must be an valid uuid (v4)')
+            throw new Error('"uuid" must be an valid uuid')
         }
 
         this._uuid = value;
