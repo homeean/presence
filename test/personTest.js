@@ -1,5 +1,5 @@
 const chai = require('chai');
-const Person = require('../person.js');
+const Person = require('../src/lib/person.js');
 
 chai.should();
 

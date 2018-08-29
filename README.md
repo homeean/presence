@@ -9,7 +9,7 @@ If the status changes, a webhook can be triggered.
 ### Raspbian/Debian/Ubuntu
 
 ```
-sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev hping3
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
 see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/bleno#prerequisites)
@@ -27,25 +27,26 @@ You can add as many person as you wish.
     "threshold": 180,
     "port": 3000,
     "webhooks": {
-            "absent": "https://url-for-absence",
-            "present": "https://url-for-presence"
-        },
+        "absent": "https://webhook-for-absence",
+        "present": "https://webhook-for-presence"
+    },
     "persons": [
         {
-            "name": "firstname",
-            "uuid": "E2C56DB5-DCHG-48D2-B060-D0A5B91096EB",
-            "ip": "192.168.1.1"
+            "name": "Your Name",
+            "uuid": "E2C786CD5-DFFB-48D3-B060-D0F5555596E0",
+            "ip": "192.168.1.1",
+            "mac": "AA:BB:CC:DD:EE:FF",
+	        "webhooks": {
+        	       "absent": "https://webhook-for-absence",
+    	           "present": "https://webhook-for-presence"
+            }
         }
     ]
 }
+
 ```
 
 ## run
 ```
 homeean-presence
-```
-
-### debug mode
-```
-DEBUG=homeean-presence homeean-presence
 ```

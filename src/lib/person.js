@@ -1,23 +1,22 @@
-const ping = require ('net-ping')
-const session = ping.createSession();
-const Bleacon = require('bleacon')
-const EventEmitter = require('events')
-const debug = require('debug')('homeean-presence')
+import logger from './log'
+import EventEmitter from 'events'
+import request from 'request'
 
-class Person extends EventEmitter {
+export default class Person extends EventEmitter {
 
     constructor(config) {
         super();
         this.name = config.name;
         this.uuid = config.uuid || null;
         this.ip = config.ip || null;
+        this.webhooks = config.webhooks || null;
         this.last_seen = 0;
-        this.last_device = null;
+        this.last_device = 'unknown';
         this.timelock = 0;
         this.last_state = false;
         this.current_state = false;
 
-        debug('%s registered as person', this.name);
+        logger.info(`${this.name} registered as person`);
     }
 
     /**
@@ -61,39 +60,40 @@ class Person extends EventEmitter {
             throw new Error('"uuid" must be an valid uuid')
         }
 
-        this._uuid = value;
+        this._uuid = value ? value.replace(/-/g, '').toLowerCase() : null;
     }
 
     /**
      *
-     * @returns {*}
+     * @returns {boolean}
      */
     getState() {
-        return this._current_state;
+        return this.current_state;
     }
 
     /**
      *
-     * @param {Boolean} value
-     * @return {void}
+     * @param value
+     * @param device
+     * @param duration
      */
-    setState(value) {
+    setState(value, device = 'unknown', duration = null) {
         if (typeof value !== 'boolean') {
             throw new Error('"state" must be of type boolean')
         }
 
-        this._current_state = value;
+        this.current_state = value;
+        this.last_device = device;
+        this._last_seen = Date.now()
+
+        if (duration) {
+            this._timelock = Date.now() + duration * 1000;
+        }
 
         if (value !== this.last_state) {
-            this.emit('stateChanged', this.name, value)
+            this.emit('stateChanged', this, value)
             this.last_state = value;
         }
-    }
-
-
-    setStateFor(value, duration) {
-        this.setState(value);
-        this.timelock = Date.now() + duration * 1000;
     }
 
     /**
@@ -117,20 +117,17 @@ class Person extends EventEmitter {
         this._last_seen = value
     }
 
-
-
     /**
-     * [ip description]
-     * @return {string} [description]
+     *
+     * @returns {String}
      */
     get ip() {
         return this._ip
     }
 
     /**
-     * [ip description]
-     * @param  {string} value [description]
-     * @return {void}       [description]
+     *
+     * @param {String} value
      */
     set ip(value) {
         const pattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -148,79 +145,17 @@ class Person extends EventEmitter {
      * @return {void}
      */
     track(interval = 20, threshold = 180) {
-        debug('start tracking for %s', this.name)
         this.interval = interval * 1000;
         this.threshold = threshold * 1000;
 
-        if (this.ip) this._ping();
-        if (this.uuid) this._bleScan();
-
         setInterval(() => {
             if (this.timelock > Date.now()) {
-                debug('%s: timelock is active, no state updates until %s',
-                    this.name,
-                    new Date(this.timelock).toISOString()
-                );
+                logger.warn(`${this.name}: timelock is active, no state updates until ${new Date(this.timelock).toISOString()}`,);
                 return;
             }
 
-            debug('%s: last_seen: %s [%s]',
-                this.name,
-                this.last_seen ? new Date(this.last_seen).toISOString() : 'never',
-                this.last_device
-            );
+            logger.info(`${this.name}: last_seen: ${this.last_seen ? new Date(this.last_seen).toISOString() : 'never'} [${this.last_device}]`,);
             this.setState(Date.now() < this.last_seen + this.threshold);
         }, this.interval);
     }
-
-    /**
-     * [_ping description]
-     * @param  {[type]} ip [description]
-     * @return {[type]}    [description]
-     */
-    _ping() {
-        setInterval(() => {
-            session.pingHost (this.ip, (error) => {
-                if (!error) {
-                    this.last_seen = Date.now();
-                    this.last_device = 'ip'
-                }
-            });
-        }, this.interval)
-    }
-
-    /**
-     * [_bleScan description]
-     * @return {[type]} [description]
-     */
-    _bleScan() {
-        setInterval(() => {
-            // debug('Start BLE Scan for %s.', this.name);
-            Bleacon.startScanning(this.uuid.replace(/-/g, '').toLowerCase());
-
-            setTimeout(() => {
-            // debug('Stop BLE Scan for %s.', this.name);
-                Bleacon.stopScanning();
-            }, this.interval / 2);
-
-        }, this.interval)
-
-        Bleacon.on('discover', (bleacon) => {
-            if (bleacon.uuid === this.uuid.replace(/-/g, '').toLowerCase()) {
-                // debug('discovered device %s.', bleacon.uuid);
-                this.last_seen = Date.now();
-                this.last_device = 'bleacon'
-            }
-        });
-    }
-
-    /**
-     * [_nmap description]
-     * @return {[type]} [description]
-     */
-    _nmap() {
-        // TODO:
-    }
 }
-
-module.exports = Person;
