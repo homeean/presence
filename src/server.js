@@ -16,7 +16,7 @@ class HomeeanPresence extends EventEmitter {
         this.server = express();
         this.server.use(bodyParser.json());
         this.persons = [];
-        this.ipAddress = 'localhost';
+        this.ipAddress = '127.0.0.1';
         this.last_state = false;
     }
 
@@ -144,7 +144,6 @@ class HomeeanPresence extends EventEmitter {
         }
     }
 }
-
 
 const homeeanPresence = new HomeeanPresence();
 homeeanPresence.run();

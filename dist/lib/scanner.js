@@ -61,7 +61,7 @@ var Scanner = function (_EventEmitter) {
             });
 
             setInterval(function () {
-                _log2.default.verbose('Starting BLE Scan');
+                _log2.default.debug('Starting BLE Scan');
 
                 try {
                     _noble2.default.startScanning(_this2.uuids);
@@ -70,7 +70,7 @@ var Scanner = function (_EventEmitter) {
                 }
 
                 setTimeout(function () {
-                    _log2.default.verbose('Stop BLE Scan');
+                    _log2.default.debug('Stop BLE Scan');
                     _noble2.default.stopScanning();
                 }, _this2.interval / 2);
             }, this.interval);
@@ -80,12 +80,12 @@ var Scanner = function (_EventEmitter) {
         value: function _ping() {
             var _this3 = this;
 
-            _log2.default.verbose('creating new ping session');
+            _log2.default.debug('creating new ping session');
             var session = _netPing2.default.createSession();
 
             setInterval(function () {
                 var _loop = function _loop(_ip) {
-                    _log2.default.verbose('pinging ' + _ip);
+                    _log2.default.debug('pinging ' + _ip);
                     session.pingHost(_ip, function (error) {
                         if (!error) {
                             _log2.default.debug('discovered ' + _ip);
@@ -134,7 +134,7 @@ var Scanner = function (_EventEmitter) {
 
             setInterval(function () {
                 var _loop2 = function _loop2(_ip2) {
-                    _log2.default.verbose('arp scan for ' + _ip2);
+                    _log2.default.debug('arp scan for ' + _ip2);
 
                     // wake up phone -- sometimes it needs more wakeups
                     for (var $i in 10) {

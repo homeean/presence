@@ -1,12 +1,7 @@
-import { createLogger, format, transports } from 'winston'
+import Logger from 'logplease'
 
-export default createLogger({
-    format: format.combine(
-        format.timestamp(), format.simple()
-    ),
-    transports: [
-        new transports.Console(),
-        new transports.File({filename: 'homeean-presence.log'})
-    ]
-})
+export default Logger.create('homeean-presence', {
+    filename: 'homeean-presence.log',
+    appendFile: false,
+});
 

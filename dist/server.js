@@ -58,7 +58,7 @@ var HomeeanPresence = function (_EventEmitter) {
         _this.server = (0, _express2.default)();
         _this.server.use(_bodyParser2.default.json());
         _this.persons = [];
-        _this.ipAddress = 'localhost';
+        _this.ipAddress = '127.0.0.1';
         _this.last_state = false;
         return _this;
     }

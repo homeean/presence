@@ -25,7 +25,7 @@ export default class Scanner extends EventEmitter {
         });
 
         setInterval(() => {
-            logger.verbose('Starting BLE Scan')
+            logger.debug('Starting BLE Scan')
 
             try {
                 noble.startScanning(this.uuids);
@@ -34,7 +34,7 @@ export default class Scanner extends EventEmitter {
             }
 
             setTimeout(() => {
-                logger.verbose('Stop BLE Scan')
+                logger.debug('Stop BLE Scan')
                 noble.stopScanning();
             }, this.interval / 2);
 
@@ -43,12 +43,12 @@ export default class Scanner extends EventEmitter {
     }
 
     _ping() {
-        logger.verbose('creating new ping session');
+        logger.debug('creating new ping session');
         const session = ping.createSession();
 
         setInterval(() => {
             for (let ip of this.ips) {
-                logger.verbose(`pinging ${ip}`);
+                logger.debug(`pinging ${ip}`);
                 session.pingHost(ip, (error) => {
                     if (!error) {
                         logger.debug(`discovered ${ip}`)
@@ -70,7 +70,7 @@ export default class Scanner extends EventEmitter {
 
         setInterval(() => {
             for (let ip of this.ips) {
-                logger.verbose(`arp scan for ${ip}`);
+                logger.debug(`arp scan for ${ip}`);
 
                 // wake up phone -- sometimes it needs more wakeups
                 for (let $i in 10) {
