@@ -77,17 +77,14 @@ export default class Person extends EventEmitter {
      * @param device
      * @param duration
      */
-    setState(value, device = 'unknown', duration = null) {
+    setState(value, duration = null) {
         if (typeof value !== 'boolean') {
             throw new Error('"state" must be of type boolean')
         }
 
         this.current_state = value;
-        this.last_device = device;
-        this._last_seen = Date.now()
-
         if (duration) {
-            this._timelock = Date.now() + duration * 1000;
+            this.timelock = Date.now() + duration * 1000;
         }
 
         if (value !== this.last_state) {

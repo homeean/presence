@@ -37,8 +37,8 @@ You can add as many person as you wish.
             "ip": "192.168.1.1",
             "mac": "AA:BB:CC:DD:EE:FF",
 	        "webhooks": {
-        	       "absent": "https://webhook-for-absence",
-    	           "present": "https://webhook-for-presence"
+	            "absent": "https://webhook-for-absence",
+	            "present": "https://webhook-for-presence"
             }
         }
     ]

@@ -45,7 +45,8 @@ class HomeeanPresence extends EventEmitter {
         this.scanner.on('discover', (type, value) => {
             const person = this._getPersonByDevice(type, value);
             if (person) {
-                person.setState(true, type);
+                person.last_seen = Date.now();
+                person.last_device = type
             }
         });
 
@@ -61,7 +62,9 @@ class HomeeanPresence extends EventEmitter {
             this.server.post('/homeean-presence/' + person.name.toLowerCase(), (req, res) => {
                 if (typeof req.body.state === 'boolean') {
                     logger.info(`received state ${req.body.state} for ${person.name}`);
-                    person.setState(req.body.state, req.body.duration || 30);
+                    person.last_seen = Date.now();
+                    person.last_device = 'Webhook';
+                    person.timelock = Date.now() + (req.body.duration || 30)
                 } else {
                     logger.warn("Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)")
                 }
@@ -78,14 +81,12 @@ class HomeeanPresence extends EventEmitter {
 
                     if (!webhook) {
                         logger.warn(`please provide an "${state ? 'present' : 'absent'}" webhook url for ${person.name}`)
-                        return;
+                    } else {
+                        request.get(webhook)
+                            .on('response', res => { logger.info(`received status ${res.statusCode}`) })
+                            .on('error', err => { logger.error(`Error triggering webhook: ${err}`) })
                     }
-
-                    request.get(webhook)
-                        .on('response', res => { logger.info(`received status ${res.statusCode}`) })
-                        .on('error', err => { logger.error(`Error triggering webhook: ${err}`) })
                 }
-
                 this._handleStateChange();
             });
 

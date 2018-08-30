@@ -54,7 +54,7 @@ export default class Scanner extends EventEmitter {
                         logger.debug(`discovered ${ip}`)
                         this.emit('discover', 'ip', ip);
                     } else {
-                        logger.error(error)
+                        //logger.error(error)
                     }
                 });
             }
@@ -74,12 +74,20 @@ export default class Scanner extends EventEmitter {
 
                 // wake up phone -- sometimes it needs more wakeups
                 for (let $i in 10) {
-                    execSync(`hping3 -2 -c 10 -p 5353 -i u1 ${ip} -q > /dev/null 2>&1`)
+                    try {
+                        execSync(`hping3 -2 -c 10 -p 5353 -i u1 ${ip} -q > /dev/null 2>&1`, {stdio: 'pipe'})
+                    } catch (err) {
+                        //logger.error('hping3 command failed')
+                    }
                 }
 
                 setTimeout(() => {
-                    let $mac = execSync(`arp -an ${ip}`)
-                    if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test($mac)) this.emit('discover', 'ip', ip);
+                    try {
+                        let mac = execSync(`arp -an ${ip}`, {stdio: 'pipe'})
+                        if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) this.emit('discover', 'ip', ip);
+                    } catch(err) {
+                        //logger.error('arp scan failed')
+                    }
                 }, 1000);
             }
         }, this.interval)
