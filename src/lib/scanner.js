@@ -6,16 +6,17 @@ import { execSync } from 'child_process'
 
 export default class Scanner extends EventEmitter {
 
-    constructor(interval, uuids, ips) {
+    constructor(interval, device, uuids, ips) {
         super();
 
         this.interval = interval * 1000
+        this.device = device;
         this.uuids = uuids
         this.ips = ips
 
         this._ping();
         this._bleScan();
-        this._arpScan();
+        if (this.device && this.ips.length) this._arpScan();
     }
 
     _bleScan() {
@@ -65,7 +66,7 @@ export default class Scanner extends EventEmitter {
 
         // flush only every 10 minutes needed
         setInterval(() => {
-            execSync(`ip neigh flush dev enxb827eb516e82 ${ip}`); //TODO make eth configurable
+            execSync(`ip neigh flush dev ${this.device} ${ip}`);
         }, 1000*60*10);
 
         setInterval(() => {

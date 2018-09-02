@@ -40,7 +40,7 @@ class HomeeanPresence extends EventEmitter {
         this._createPersons();
         const uuids = this.config.persons.filter(p => p.uuid).map(p =>  p.uuid);
         const ips = this.config.persons.filter(p => p.ip).map(p =>  p.ip);
-        this.scanner = new Scanner(this.config.interval, uuids, ips);
+        this.scanner = new Scanner(this.config.interval, this.config.device, uuids, ips);
 
         this.scanner.on('discover', (type, value) => {
             const person = this._getPersonByDevice(type, value);
