@@ -64,9 +64,16 @@ export default class Scanner extends EventEmitter {
 
     _arpScan() {
 
+        // first, then every 10 minutes
+        for (let ip of this.ips) {
+            execSync(`ip neigh flush dev ${this.device} ${ip}`);
+        }
+
         // flush only every 10 minutes needed
         setInterval(() => {
-            execSync(`ip neigh flush dev ${this.device} ${ip}`);
+            for (let ip of this.ips) {
+                execSync(`ip neigh flush dev ${this.device} ${ip}`);
+            }
         }, 1000*60*10);
 
         setInterval(() => {
