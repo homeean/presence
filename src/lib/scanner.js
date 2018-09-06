@@ -64,15 +64,17 @@ export default class Scanner extends EventEmitter {
 
     _arpScan() {
 
-        // first, then every 10 minutes
-        for (let ip of this.ips) {
-            execSync(`ip neigh flush dev ${this.device} ${ip}`);
+        // first flush arp table
+        try {
+            execSync(`sudo ip neigh flush ${ip}`);
+        } catch (err) {
+            logger.error(err);
         }
 
         // flush only every 10 minutes needed
         setInterval(() => {
             for (let ip of this.ips) {
-                execSync(`ip neigh flush dev ${this.device} ${ip}`);
+                execSync(`sudo ip neigh flush ${ip}`);
             }
         }, 1000*60*10);
 
@@ -81,20 +83,20 @@ export default class Scanner extends EventEmitter {
                 logger.debug(`arp scan for ${ip}`);
 
                 // wake up phone -- sometimes it needs more wakeups
-                for (let $i in 10) {
+                for (let $i in 30) {
                     try {
-                        execSync(`hping3 -2 -c 10 -p 5353 -i u1 ${ip} -q > /dev/null 2>&1`, {stdio: 'pipe'})
+                        execSync(`sudo hping3 -2 -c 10 -p 5353 -i u1 ${ip} -q > /dev/null 2>&1`, {stdio: 'pipe'})
                     } catch (err) {
-                        //logger.error('hping3 command failed')
+                        logger.error(err)
                     }
                 }
 
                 setTimeout(() => {
                     try {
-                        let mac = execSync(`arp -an ${ip}`, {stdio: 'pipe'})
+                        let mac = execSync(`sudo arp -an ${ip}`, {stdio: 'pipe'})
                         if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) this.emit('discover', 'ip', ip);
                     } catch(err) {
-                        //logger.error('arp scan failed')
+                        logger.error(err)
                     }
                 }, 1000);
             }

@@ -76,19 +76,15 @@ var Person = function (_EventEmitter) {
     }, {
         key: 'setState',
         value: function setState(value) {
-            var device = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'unknown';
-            var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+            var duration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
             if (typeof value !== 'boolean') {
                 throw new Error('"state" must be of type boolean');
             }
 
             this.current_state = value;
-            this.last_device = device;
-            this._last_seen = Date.now();
-
             if (duration) {
-                this._timelock = Date.now() + duration * 1000;
+                this.timelock = Date.now() + duration * 1000;
             }
 
             if (value !== this.last_state) {

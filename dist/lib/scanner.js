@@ -35,18 +35,19 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Scanner = function (_EventEmitter) {
     _inherits(Scanner, _EventEmitter);
 
-    function Scanner(interval, uuids, ips) {
+    function Scanner(interval, device, uuids, ips) {
         _classCallCheck(this, Scanner);
 
         var _this = _possibleConstructorReturn(this, (Scanner.__proto__ || Object.getPrototypeOf(Scanner)).call(this));
 
         _this.interval = interval * 1000;
+        _this.device = device;
         _this.uuids = uuids;
         _this.ips = ips;
 
         _this._ping();
         _this._bleScan();
-        _this._arpScan();
+        if (_this.device && _this.ips.length) _this._arpScan();
         return _this;
     }
 
@@ -91,7 +92,7 @@ var Scanner = function (_EventEmitter) {
                             _log2.default.debug('discovered ' + _ip);
                             _this3.emit('discover', 'ip', _ip);
                         } else {
-                            _log2.default.error(error);
+                            //logger.error(error)
                         }
                     });
                 };
@@ -127,26 +128,15 @@ var Scanner = function (_EventEmitter) {
         value: function _arpScan() {
             var _this4 = this;
 
+            // first flush arp table
+            try {
+                (0, _child_process.execSync)('sudo ip neigh flush ' + ip);
+            } catch (err) {
+                _log2.default.error(err);
+            }
+
             // flush only every 10 minutes needed
             setInterval(function () {
-                (0, _child_process.execSync)('ip neigh flush dev enxb827eb516e82 ' + ip); //TODO make eth configurable
-            }, 1000 * 60 * 10);
-
-            setInterval(function () {
-                var _loop2 = function _loop2(_ip2) {
-                    _log2.default.debug('arp scan for ' + _ip2);
-
-                    // wake up phone -- sometimes it needs more wakeups
-                    for (var $i in 10) {
-                        (0, _child_process.execSync)('hping3 -2 -c 10 -p 5353 -i u1 ' + _ip2 + ' -q > /dev/null 2>&1');
-                    }
-
-                    setTimeout(function () {
-                        var $mac = (0, _child_process.execSync)('arp -an ' + _ip2);
-                        if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test($mac)) _this4.emit('discover', 'ip', _ip2);
-                    }, 1000);
-                };
-
                 var _iteratorNormalCompletion2 = true;
                 var _didIteratorError2 = false;
                 var _iteratorError2 = undefined;
@@ -155,7 +145,7 @@ var Scanner = function (_EventEmitter) {
                     for (var _iterator2 = _this4.ips[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                         var _ip2 = _step2.value;
 
-                        _loop2(_ip2);
+                        (0, _child_process.execSync)('sudo ip neigh flush ' + _ip2);
                     }
                 } catch (err) {
                     _didIteratorError2 = true;
@@ -168,6 +158,55 @@ var Scanner = function (_EventEmitter) {
                     } finally {
                         if (_didIteratorError2) {
                             throw _iteratorError2;
+                        }
+                    }
+                }
+            }, 1000 * 60 * 10);
+
+            setInterval(function () {
+                var _loop2 = function _loop2(_ip3) {
+                    _log2.default.debug('arp scan for ' + _ip3);
+
+                    // wake up phone -- sometimes it needs more wakeups
+                    for (var $i in 30) {
+                        try {
+                            (0, _child_process.execSync)('sudo hping3 -2 -c 10 -p 5353 -i u1 ' + _ip3 + ' -q > /dev/null 2>&1', { stdio: 'pipe' });
+                        } catch (err) {
+                            _log2.default.error(err);
+                        }
+                    }
+
+                    setTimeout(function () {
+                        try {
+                            var mac = (0, _child_process.execSync)('sudo arp -an ' + _ip3, { stdio: 'pipe' });
+                            if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) _this4.emit('discover', 'ip', _ip3);
+                        } catch (err) {
+                            _log2.default.error(err);
+                        }
+                    }, 1000);
+                };
+
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
+
+                try {
+                    for (var _iterator3 = _this4.ips[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var _ip3 = _step3.value;
+
+                        _loop2(_ip3);
+                    }
+                } catch (err) {
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
+                        }
+                    } finally {
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
                         }
                     }
                 }

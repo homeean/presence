@@ -95,12 +95,13 @@ var HomeeanPresence = function (_EventEmitter) {
             }).map(function (p) {
                 return p.ip;
             });
-            this.scanner = new _scanner2.default(this.config.interval, uuids, ips);
+            this.scanner = new _scanner2.default(this.config.interval, this.config.device, uuids, ips);
 
             this.scanner.on('discover', function (type, value) {
                 var person = _this2._getPersonByDevice(type, value);
                 if (person) {
-                    person.setState(true, type);
+                    person.last_seen = Date.now();
+                    person.last_device = type;
                 }
             });
 
@@ -119,7 +120,9 @@ var HomeeanPresence = function (_EventEmitter) {
                 _this3.server.post('/homeean-presence/' + person.name.toLowerCase(), function (req, res) {
                     if (typeof req.body.state === 'boolean') {
                         _log2.default.info('received state ' + req.body.state + ' for ' + person.name);
-                        person.setState(req.body.state, req.body.duration || 30);
+                        person.last_seen = Date.now();
+                        person.last_device = 'Webhook';
+                        person.timelock = Date.now() + (req.body.duration || 30);
                     } else {
                         _log2.default.warn("Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)");
                     }
@@ -136,16 +139,14 @@ var HomeeanPresence = function (_EventEmitter) {
 
                         if (!webhook) {
                             _log2.default.warn('please provide an "' + (state ? 'present' : 'absent') + '" webhook url for ' + person.name);
-                            return;
+                        } else {
+                            _request2.default.get(webhook).on('response', function (res) {
+                                _log2.default.info('received status ' + res.statusCode);
+                            }).on('error', function (err) {
+                                _log2.default.error('Error triggering webhook: ' + err);
+                            });
                         }
-
-                        _request2.default.get(webhook).on('response', function (res) {
-                            _log2.default.info('received status ' + res.statusCode);
-                        }).on('error', function (err) {
-                            _log2.default.error('Error triggering webhook: ' + err);
-                        });
                     }
-
                     _this3._handleStateChange();
                 });
 
