@@ -30,8 +30,8 @@ export default class Scanner extends EventEmitter {
 
             try {
                 noble.startScanning(this.uuids);
-            } catch(e) {
-                logger.error(e)
+            } catch(err) {
+                logger.error(`ble scan error: ${err.message}`)
             }
 
             setTimeout(() => {
@@ -49,13 +49,13 @@ export default class Scanner extends EventEmitter {
 
         setInterval(() => {
             for (let ip of this.ips) {
-                logger.debug(`pinging ${ip}`);
-                session.pingHost(ip, (error) => {
-                    if (!error) {
-                        logger.debug(`discovered ${ip}`)
+                logger.debug(`ping ${ip}`);
+                session.pingHost(ip, (err) => {
+                    if (!err) {
+                        logger.debug(`discovered ${ip} with ping`)
                         this.emit('discover', 'ip', ip);
                     } else {
-                        //logger.error(error)
+                        logger.debug(`ping error: ${err.message}`)
                     }
                 });
             }
@@ -64,42 +64,46 @@ export default class Scanner extends EventEmitter {
 
     _arpScan() {
 
-        // first flush arp table
-        try {
-            execSync(`sudo ip neigh flush ${ip}`);
-        } catch (err) {
-            logger.error(err);
-        }
-
-        // flush only every 10 minutes needed
-        setInterval(() => {
-            for (let ip of this.ips) {
-                execSync(`sudo ip neigh flush ${ip}`);
-            }
-        }, 1000*60*10);
+        this.flushArpTable();
+        // flush every 10 minutes
+        setInterval(() => {this.flushArpTable()}, 1000*60*10);
 
         setInterval(() => {
             for (let ip of this.ips) {
                 logger.debug(`arp scan for ${ip}`);
 
                 // wake up phone -- sometimes it needs more wakeups
-                for (let $i in 30) {
+                for (let i=0; i<10; i++) {
                     try {
                         execSync(`sudo hping3 -2 -c 10 -p 5353 -i u1 ${ip} -q > /dev/null 2>&1`, {stdio: 'pipe'})
                     } catch (err) {
-                        logger.error(err)
+                        //logger.debug(err.message)
                     }
                 }
 
                 setTimeout(() => {
                     try {
                         let mac = execSync(`sudo arp -an ${ip}`, {stdio: 'pipe'})
-                        if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) this.emit('discover', 'ip', ip);
+                        if (/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) {
+                            logger.debug(`discovered ${ip} with arp scan`)
+                            this.emit('discover', 'ip', ip);
+                        }
                     } catch(err) {
-                        logger.error(err)
+                        logger.debug(`arp scan error: ${err.message}`)
                     }
                 }, 1000);
             }
         }, this.interval)
+    }
+
+    flushArpTable() {
+        logger.debug('flushing arp table');
+        try {
+            for (let ip of this.ips) {
+                execSync(`sudo ip neigh flush ${ip}`);
+            }
+        } catch (err) {
+            logger.error(err);
+        }
     }
 }

@@ -26,7 +26,6 @@ You can add as many person as you wish.
     "interval": 20,
     "threshold": 180,
     "port": 3000,
-    "device": "eth0",
     "webhooks": {
         "absent": "https://webhook-for-absence",
         "present": "https://webhook-for-presence"
@@ -46,7 +45,7 @@ You can add as many person as you wish.
 }
 
 ```
-- **device:** your network device (run ifconfig to find) 
+
 ## run
 ```
 homeean-presence
