@@ -4,27 +4,38 @@
   "description": "presence detection for your smart home",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require babel-core/register"
+    "test": "mocha --compilers js:babel-core/register",
+    "start": "nodemon ./src/server.js --exec babel-node --presets babel-preset-env",
+    "build": "babel src -d dist --presets babel-preset-env",
+    "serve": "node dist/server.js"
   },
   "keywords": [
     "presence",
     "presence-detection"
   ],
-  "author": "stfnhmplr <stfnhmplr@gmail.com> (http://himpler.com)",
+  "author": "stfnhmplr <info@himpler.com> (https://himpler.com)",
   "license": "MIT",
   "dependencies": {
-    "bleacon": "^0.5.1",
-    "body-parser": "^1.18.2",
-    "debug": "^3.1.0",
+    "body-parser": "^1.18.3",
     "express": "^4.16.3",
-    "net-ping": "^1.2.1",
+    "logplease": "^1.2.15",
+    "arping": "^0.1.0",
+    "noble": "^1.9.1",
     "request": "^2.87.0"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
   },
   "devDependencies": {
     "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
-    "mocha": "^5.1.1"
+    "mocha": "^5.1.1",
+    "nodemon": "^1.18.3"
   },
   "bin": {
     "homeean-presence": "./bin/cli.js"
