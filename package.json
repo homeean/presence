@@ -1,6 +1,6 @@
 {
   "name": "homeean-presence",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "presence detection for your smart home",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "express": "^4.16.3",
     "logplease": "^1.2.15",
     "arping": "^0.1.0",
+    "raw-socket": "^1.6.4",
     "noble": "^1.9.1",
     "request": "^2.87.0"
   },
