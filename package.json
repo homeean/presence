@@ -1,6 +1,6 @@
 {
   "name": "homeean-presence",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "presence detection for your smart home",
   "main": "index.js",
   "scripts": {
