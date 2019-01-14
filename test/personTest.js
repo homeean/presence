@@ -1,14 +1,15 @@
 const chai = require('chai');
-const Person = require('../src/lib/person.js');
+import Person from '../src/lib/person'
 
 chai.should();
+let person;
 
 describe('Person', () => {
 
     beforeEach(() => {
         person = new Person({
             name: 'Username',
-            uuid: '6d412d3b-7ec4-43c4-97ad-0187e70ac9bc',
+            ble: '00:09:8C:00:69:63',
             ip: '192.168.178.238'
         })
         person.last_seen = 1519129853500
@@ -27,20 +28,20 @@ describe('Person', () => {
         })
     })
 
-    describe('#uuid', () => {
-        it('returns the uuid', () => {
-            person.uuid.should.equal('6d412d3b-7ec4-43c4-97ad-0187e70ac9bc')
+    describe('#ble', () => {
+        it('returns the ble mac address', () => {
+            person.ble.should.equal('00:09:8C:00:69:63')
         })
 
         it('can be null', () => {
             (() => {
-                person.uuid = null
+                person.ble = null
             }).should.not.throw(Error);
         })
 
-        it('returns only accepts valid uuids', () => {
+        it('returns only accepts valid mac addresses', () => {
             (() => {
-                person.uuid = 'l24872NJN4523468346NFNNF'
+                person.ble = '1340c:8C:00:69:63'
             }).should.throw(Error)
         })
     })

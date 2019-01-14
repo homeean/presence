@@ -14,10 +14,6 @@ var _events = require('events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _request = require('request');
-
-var _request2 = _interopRequireDefault(_request);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35,9 +31,10 @@ var Person = function (_EventEmitter) {
         var _this = _possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).call(this));
 
         _this.name = config.name;
-        _this.uuid = config.uuid || null;
+        _this.ble = config.ble || null;
         _this.ip = config.ip || null;
         _this.webhooks = config.webhooks || null;
+
         _this.last_seen = 0;
         _this.last_device = 'unknown';
         _this.timelock = 0;
@@ -49,8 +46,8 @@ var Person = function (_EventEmitter) {
     }
 
     /**
-     * [name description]
-     * @return {string} [description]
+     *
+     * @returns {string}
      */
 
 
@@ -69,7 +66,6 @@ var Person = function (_EventEmitter) {
         /**
          *
          * @param value
-         * @param device
          * @param duration
          */
 
@@ -94,8 +90,8 @@ var Person = function (_EventEmitter) {
         }
 
         /**
-         * [last_seen description]
-         * @return {Number} [description]
+         *
+         * @returns {Number|number}
          */
 
     }, {
@@ -105,17 +101,15 @@ var Person = function (_EventEmitter) {
         /**
          * start tracking of person
          * @param  {Number} [interval=20] check interval in seconds
-         * @param  {Number} [treshold=180] threshold before state change in seconds
+         * @param  {Number} [threshold=240] threshold before state change in seconds
          * @return {void}
          */
         value: function track() {
             var _this2 = this;
 
             var interval = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 20;
-            var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 180;
+            var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
 
-            this.interval = interval * 1000;
-            this.threshold = threshold * 1000;
 
             setInterval(function () {
                 if (_this2.timelock > Date.now()) {
@@ -124,8 +118,8 @@ var Person = function (_EventEmitter) {
                 }
 
                 _log2.default.info(_this2.name + ': last_seen: ' + (_this2.last_seen ? new Date(_this2.last_seen).toISOString() : 'never') + ' [' + _this2.last_device + ']');
-                _this2.setState(Date.now() < _this2.last_seen + _this2.threshold);
-            }, this.interval);
+                _this2.setState(Date.now() < _this2.last_seen + threshold * 1000);
+            }, interval * 1000);
         }
     }, {
         key: 'name',
@@ -134,9 +128,8 @@ var Person = function (_EventEmitter) {
         }
 
         /**
-         * [name description]
-         * @param  {string} value [description]
-         * @return {void}       [description]
+         *
+         * @param value
          */
         ,
         set: function set(value) {
@@ -148,30 +141,29 @@ var Person = function (_EventEmitter) {
         }
 
         /**
-         * [uuid description]
-         * @return {string} [description]
+         *
+         * @returns {string}
          */
 
     }, {
-        key: 'uuid',
+        key: 'ble',
         get: function get() {
-            return this._uuid;
+            return this._ble;
         }
 
         /**
-         * [uuid description]
-         * @param  {string} value [description]
-         * @return {void}       [description]
+         *
+         * @param value
          */
         ,
         set: function set(value) {
-            var pattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+            var pattern = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i;
 
             if (!pattern.test(value) && value !== null) {
-                throw new Error('"uuid" must be an valid uuid');
+                throw new Error('"ble" must be an valid mac address');
             }
 
-            this._uuid = value ? value.replace(/-/g, '').toLowerCase() : null;
+            this._ble = value;
         }
     }, {
         key: 'last_seen',
@@ -180,9 +172,8 @@ var Person = function (_EventEmitter) {
         }
 
         /**
-         * [last_seen description]
-         * @param  {Number} value [description]
-         * @return {void}       [description]
+         *
+         * @param value
          */
         ,
         set: function set(value) {
@@ -206,7 +197,7 @@ var Person = function (_EventEmitter) {
 
         /**
          *
-         * @param {String} value
+         * @param value
          */
         ,
         set: function set(value) {

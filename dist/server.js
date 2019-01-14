@@ -85,17 +85,17 @@ var HomeeanPresence = function (_EventEmitter) {
             }
 
             this._createPersons();
-            var uuids = this.config.persons.filter(function (p) {
-                return p.uuid;
+            var bles = this.config.persons.filter(function (p) {
+                return p.ble;
             }).map(function (p) {
-                return p.uuid;
+                return p.ble;
             });
             var ips = this.config.persons.filter(function (p) {
                 return p.ip;
             }).map(function (p) {
                 return p.ip;
             });
-            this.scanner = new _scanner2.default(this.config.interval, this.config.device, uuids, ips);
+            this.scanner = new _scanner2.default(this.config.interval, this.config.device, bles, ips);
 
             this.scanner.on('discover', function (type, value) {
                 var person = _this2._getPersonByDevice(type, value);

@@ -13,14 +13,13 @@
     "presence",
     "presence-detection"
   ],
-  "author": "stfnhmplr <stfnhmplr@gmail.com> (http://himpler.com)",
+  "author": "stfnhmplr <info@himpler.com> (https://himpler.com)",
   "license": "MIT",
   "dependencies": {
-    "bleno": "^0.5.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "logplease": "^1.2.15",
-    "net-ping": "^1.2.3",
+    "arping": "^0.1.0",
     "noble": "^1.9.1",
     "request": "^2.87.0"
   },

@@ -1,15 +1,15 @@
 import logger from './log'
 import EventEmitter from 'events'
-import request from 'request'
 
 export default class Person extends EventEmitter {
 
     constructor(config) {
         super();
         this.name = config.name;
-        this.uuid = config.uuid || null;
+        this.ble = config.ble || null;
         this.ip = config.ip || null;
         this.webhooks = config.webhooks || null;
+
         this.last_seen = 0;
         this.last_device = 'unknown';
         this.timelock = 0;
@@ -20,17 +20,16 @@ export default class Person extends EventEmitter {
     }
 
     /**
-     * [name description]
-     * @return {string} [description]
+     *
+     * @returns {string}
      */
     get name() {
         return this._name;
     }
 
     /**
-     * [name description]
-     * @param  {string} value [description]
-     * @return {void}       [description]
+     *
+     * @param value
      */
     set name(value) {
         if (typeof value !== 'string') {
@@ -41,26 +40,25 @@ export default class Person extends EventEmitter {
     }
 
     /**
-     * [uuid description]
-     * @return {string} [description]
+     *
+     * @returns {string}
      */
-    get uuid() {
-        return this._uuid;
+    get ble() {
+        return this._ble;
     }
 
     /**
-     * [uuid description]
-     * @param  {string} value [description]
-     * @return {void}       [description]
+     *
+     * @param value
      */
-    set uuid(value) {
-        const pattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
+    set ble(value) {
+        const pattern = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i
 
         if(!pattern.test(value) && value !== null) {
-            throw new Error('"uuid" must be an valid uuid')
+            throw new Error('"ble" must be an valid mac address')
         }
 
-        this._uuid = value ? value.replace(/-/g, '').toLowerCase() : null;
+        this._ble = value;
     }
 
     /**
@@ -74,7 +72,6 @@ export default class Person extends EventEmitter {
     /**
      *
      * @param value
-     * @param device
      * @param duration
      */
     setState(value, duration = null) {
@@ -94,17 +91,16 @@ export default class Person extends EventEmitter {
     }
 
     /**
-     * [last_seen description]
-     * @return {Number} [description]
+     *
+     * @returns {Number|number}
      */
     get last_seen() {
         return this._last_seen
     }
 
     /**
-     * [last_seen description]
-     * @param  {Number} value [description]
-     * @return {void}       [description]
+     *
+     * @param value
      */
     set last_seen(value) {
         if (typeof value !== 'number') {
@@ -124,7 +120,7 @@ export default class Person extends EventEmitter {
 
     /**
      *
-     * @param {String} value
+     * @param value
      */
     set ip(value) {
         const pattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -138,12 +134,10 @@ export default class Person extends EventEmitter {
     /**
      * start tracking of person
      * @param  {Number} [interval=20] check interval in seconds
-     * @param  {Number} [treshold=180] threshold before state change in seconds
+     * @param  {Number} [threshold=240] threshold before state change in seconds
      * @return {void}
      */
-    track(interval = 20, threshold = 180) {
-        this.interval = interval * 1000;
-        this.threshold = threshold * 1000;
+    track(interval = 20, threshold = 300) {
 
         setInterval(() => {
             if (this.timelock > Date.now()) {
@@ -152,7 +146,7 @@ export default class Person extends EventEmitter {
             }
 
             logger.info(`${this.name}: last_seen: ${this.last_seen ? new Date(this.last_seen).toISOString() : 'never'} [${this.last_device}]`,);
-            this.setState(Date.now() < this.last_seen + this.threshold);
-        }, this.interval);
+            this.setState(Date.now() < this.last_seen + threshold * 1000);
+        }, interval * 1000);
     }
 }
