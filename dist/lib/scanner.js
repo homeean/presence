@@ -18,9 +18,13 @@ var _log = require('./log');
 
 var _log2 = _interopRequireDefault(_log);
 
-var _arping = require('arping');
+var _arping2 = require('arping');
 
-var _arping2 = _interopRequireDefault(_arping);
+var _arping3 = _interopRequireDefault(_arping2);
+
+var _netPing = require('net-ping');
+
+var _netPing2 = _interopRequireDefault(_netPing);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33,7 +37,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Scanner = function (_EventEmitter) {
     _inherits(Scanner, _EventEmitter);
 
-    function Scanner(interval, device, bles, ips) {
+    function Scanner(interval, device, bles, ips, ownIp) {
         _classCallCheck(this, Scanner);
 
         var _this = _possibleConstructorReturn(this, (Scanner.__proto__ || Object.getPrototypeOf(Scanner)).call(this));
@@ -42,6 +46,7 @@ var Scanner = function (_EventEmitter) {
         _this.device = device;
         _this.bles = bles;
         _this.ips = ips;
+        _this.subnet = ownIp.split('.').slice(0, 3).join('.');
 
         _this._ping();
         _this._bleScan();
@@ -91,18 +96,6 @@ var Scanner = function (_EventEmitter) {
             var _this3 = this;
 
             setInterval(function () {
-                var _loop = function _loop(ip) {
-                    _log2.default.debug('pinging ' + ip);
-                    _arping2.default.ping(ip, { tries: 10 }, function (err, info) {
-                        if (err) {
-                            _log2.default.debug('Can\'t find ' + ip + ', ' + err);
-                        } else {
-                            _log2.default.debug('found ' + info.sip + ', mac: ' + info.sha);
-                            _this3.emit('discover', 'ip', ip);
-                        }
-                    });
-                };
-
                 var _iteratorNormalCompletion = true;
                 var _didIteratorError = false;
                 var _iteratorError = undefined;
@@ -111,7 +104,13 @@ var Scanner = function (_EventEmitter) {
                     for (var _iterator = _this3.ips[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                         var ip = _step.value;
 
-                        _loop(ip);
+                        if (_this3._isSameSubnet(ip)) {
+                            _log2.default.debug('arping ' + ip);
+                            _this3._arping(ip);
+                        } else {
+                            _log2.default.debug('pinging ' + ip);
+                            _this3._pingHost(ip);
+                        }
                     }
                 } catch (err) {
                     _didIteratorError = true;
@@ -128,6 +127,40 @@ var Scanner = function (_EventEmitter) {
                     }
                 }
             }, this.interval);
+        }
+    }, {
+        key: '_arping',
+        value: function _arping(ip) {
+            var _this4 = this;
+
+            _arping3.default.ping(ip, { tries: 10 }, function (err, info) {
+                if (err) {
+                    _log2.default.debug('Can\'t find ' + ip + ', ' + err);
+                } else {
+                    _log2.default.debug('found ' + info.sip + ', mac: ' + info.sha);
+                    _this4.emit('discover', 'ip', ip);
+                }
+            });
+        }
+    }, {
+        key: '_pingHost',
+        value: function _pingHost(ip) {
+            var _this5 = this;
+
+            var session = _netPing2.default.createSession();
+            session.pingHost(ip, function (err) {
+                if (!err) {
+                    _this5.emit('discover', 'ip', ip);
+                } else {
+                    _log2.default.debug('Can\'t find ' + ip + ', ' + err);
+                }
+                session.close();
+            });
+        }
+    }, {
+        key: '_isSameSubnet',
+        value: function _isSameSubnet(ip) {
+            return this.subnet === ip.substr(0, this.subnet.length);
         }
     }]);
 

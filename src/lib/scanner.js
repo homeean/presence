@@ -2,16 +2,18 @@ import EventEmitter from 'events'
 import noble from 'noble'
 import logger from "./log";
 import arping from 'arping'
+import ping from 'net-ping'
 
 export default class Scanner extends EventEmitter {
 
-    constructor(interval, device, bles, ips) {
+    constructor(interval, device, bles, ips, ownIp) {
         super();
 
         this.interval = interval * 1000
         this.device = device;
         this.bles = bles
         this.ips = ips
+        this.subnet = ownIp.split('.').slice(0,3).join('.');
 
         this._ping();
         this._bleScan();
@@ -56,16 +58,41 @@ export default class Scanner extends EventEmitter {
     _ping() {
         setInterval(() => {
             for (let ip of this.ips) {
-                logger.debug(`pinging ${ip}`)
-                arping.ping(ip, { tries: 10 }, (err, info) => {
-                    if (err) {
-                        logger.debug(`Can't find ${ip}, ${err}`);
-                    } else {
-                        logger.debug(`found ${info.sip}, mac: ${info.sha}`);
-                        this.emit('discover', 'ip', ip)
-                    }
-                });
+                if (this._isSameSubnet(ip)) {
+                    logger.debug(`arping ${ip}`)
+                    this._arping(ip);
+                } else {
+                    logger.debug(`pinging ${ip}`)
+                    this._pingHost(ip);
+                }
             }
         }, this.interval)
+    }
+
+    _arping(ip) {
+        arping.ping(ip, { tries: 10 }, (err, info) => {
+            if (err) {
+                logger.debug(`Can't find ${ip}, ${err}`);
+            } else {
+                logger.debug(`found ${info.sip}, mac: ${info.sha}`);
+                this.emit('discover', 'ip', ip)
+            }
+        });
+    }
+
+    _pingHost(ip) {
+        const session = ping.createSession ();
+        session.pingHost(ip, (err) => {
+            if (!err) {
+                this.emit('discover', 'ip', ip)
+            } else {
+                logger.debug(`Can't find ${ip}, ${err}`);
+            }
+            session.close();
+        })
+    }
+
+    _isSameSubnet(ip) {
+        return this.subnet === ip.substr(0, this.subnet.length)
     }
 }

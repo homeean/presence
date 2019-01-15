@@ -95,7 +95,7 @@ var HomeeanPresence = function (_EventEmitter) {
             }).map(function (p) {
                 return p.ip;
             });
-            this.scanner = new _scanner2.default(this.config.interval, this.config.device, bles, ips);
+            this.scanner = new _scanner2.default(this.config.interval, this.config.device, bles, ips, this.ipAddress);
 
             this.scanner.on('discover', function (type, value) {
                 var person = _this2._getPersonByDevice(type, value);
