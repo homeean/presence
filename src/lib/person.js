@@ -141,11 +141,11 @@ export default class Person extends EventEmitter {
 
         setInterval(() => {
             if (this.timelock > Date.now()) {
-                logger.warn(`${this.name}: timelock is active, no state updates until ${new Date(this.timelock).toISOString()}`,);
+                logger.warn(`${this.name}: timelock is active, no state updates until ${new Date(this.timelock).toLocaleString()}`,);
                 return;
             }
 
-            logger.info(`${this.name}: last_seen: ${this.last_seen ? new Date(this.last_seen).toISOString() : 'never'} [${this.last_device}]`,);
+            logger.info(`${this.name}: last_seen: ${this.last_seen ? new Date(this.last_seen).toLocaleString() : 'never'} [${this.last_device}]`,);
             this.setState(Date.now() < this.last_seen + threshold * 1000);
         }, interval * 1000);
     }

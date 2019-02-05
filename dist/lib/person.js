@@ -113,11 +113,11 @@ var Person = function (_EventEmitter) {
 
             setInterval(function () {
                 if (_this2.timelock > Date.now()) {
-                    _log2.default.warn(_this2.name + ': timelock is active, no state updates until ' + new Date(_this2.timelock).toISOString());
+                    _log2.default.warn(_this2.name + ': timelock is active, no state updates until ' + new Date(_this2.timelock).toLocaleString());
                     return;
                 }
 
-                _log2.default.info(_this2.name + ': last_seen: ' + (_this2.last_seen ? new Date(_this2.last_seen).toISOString() : 'never') + ' [' + _this2.last_device + ']');
+                _log2.default.info(_this2.name + ': last_seen: ' + (_this2.last_seen ? new Date(_this2.last_seen).toLocaleString() : 'never') + ' [' + _this2.last_device + ']');
                 _this2.setState(Date.now() < _this2.last_seen + threshold * 1000);
             }, interval * 1000);
         }
