@@ -1,15 +1,14 @@
-import logger from './lib/log'
-import Person from './lib/person'
-import Scanner from './lib/scanner'
-import express from 'express'
-import bodyParser from 'body-parser'
-import request from 'request'
-import fs from 'fs'
-import os from 'os'
-import EventEmitter from 'events'
+import logger from './lib/log';
+import Person from './lib/person';
+import Scanner from './lib/scanner';
+import express from 'express';
+import bodyParser from 'body-parser';
+import request from 'request';
+import fs from 'fs';
+import os from 'os';
+import EventEmitter from 'events';
 
 class HomeeanPresence extends EventEmitter {
-
     constructor(config) {
         super();
         this.config = config;
@@ -23,68 +22,103 @@ class HomeeanPresence extends EventEmitter {
     run() {
         logger.info('homeean-presence');
         logger.info('2018 by stfnhmplr | homeean.de');
-        logger.info(`running on node ${process.version}`)
+        logger.info(`running on node ${process.version}`);
 
         try {
-            this.ipAddress = [].concat.apply([], Object.values(os.networkInterfaces()))
-                .filter(details => details.family === 'IPv4' && !details.internal).pop().address
-        }
-        catch (e) {
-            logger.warn("can't get ip-address, please check your network connection")
+            this.ipAddress = [].concat
+                .apply([], Object.values(os.networkInterfaces()))
+                .filter(details => details.family === 'IPv4' && !details.internal)
+                .pop().address;
+        } catch (e) {
+            logger.warn("can't get ip-address, please check your network connection");
         }
 
-        if (typeof(this.config) !== 'Object') {
-            this._loadConfig()
+        if (typeof this.config !== 'Object') {
+            this._loadConfig();
         }
 
         this._createPersons();
-        const bles = this.config.persons.filter(p => p.ble).map(p =>  p.ble);
-        const ips = this.config.persons.filter(p => p.ip).map(p =>  p.ip);
-        this.scanner = new Scanner(this.config.interval, this.config.device, bles, ips, this.ipAddress);
+        const bles = this.config.persons.filter(p => p.ble).map(p => p.ble);
+        const ips = this.config.persons.filter(p => p.ip).map(p => p.ip);
+        this.scanner = new Scanner(
+            this.config.interval,
+            this.config.device,
+            bles,
+            ips,
+            this.ipAddress
+        );
 
         this.scanner.on('discover', (type, value) => {
             const person = this._getPersonByDevice(type, value);
             if (person) {
                 person.last_seen = Date.now();
-                person.last_device = type
+                person.last_device = type;
             }
         });
 
-        this.server.listen(this.config.port)
+        this.server.listen(this.config.port);
     }
 
     _createPersons() {
-        this.config.persons.forEach((p) => {
+        this.config.persons.forEach(p => {
             let person = new Person(p);
 
-            logger.info(`setting up webhook http://${this.ipAddress}:${this.config.port}/homeean-presence/${person.name.toLowerCase()}`)
+            logger.info(
+                `setting up webhook http://${this.ipAddress}:${
+                    this.config.port
+                }/homeean-presence/${person.name.toLowerCase()}`
+            );
 
             this.server.post('/homeean-presence/' + person.name.toLowerCase(), (req, res) => {
                 if (typeof req.body.state === 'boolean') {
-                    logger.info(`received state ${req.body.state} for ${person.name}`);
+                    logger.info(
+                        `received webhook with state "${req.body.state}" for ${person.name}`
+                    );
                     person.last_seen = Date.now();
                     person.last_device = 'Webhook';
-                    person.timelock = Date.now() + (req.body.duration || 30)
+                    const timelock = req.body.duration || 30;
+                    person.timelock = Date.now() + timelock * 1000;
+                    logger.debug(
+                        `timelock for ${timelock}s until ${new Date(
+                            person.timelock
+                        ).toLocaleString()}`
+                    );
+                    new Date(this.timelock).toLocaleString();
                 } else {
-                    logger.warn("Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)")
+                    logger.warn(
+                        "Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)"
+                    );
                 }
 
-                res.send(`received state ${req.body.state} for ${person.name}`)
-            })
+                res.send(`received webhook with state "${req.body.state}" for ${person.name}`);
+            });
 
             person.on('stateChanged', (person, state) => {
-                logger.info(`${person.name} is ${state ? 'present' : 'absent'}.`)
+                logger.info(`${person.name} is ${state ? 'present' : 'absent'}.`);
 
                 if (person.webhooks) {
-                    logger.info(`${person.name} ${state ? 'is' : 'is not'} @home, triggering persons webhook for ${state ? 'presence' : 'absence'}`);
+                    logger.info(
+                        `${person.name} ${
+                            state ? 'is' : 'is not'
+                        } @home, triggering persons webhook for ${state ? 'presence' : 'absence'}`
+                    );
                     let webhook = person.webhooks[state ? 'present' : 'absent'];
 
                     if (!webhook) {
-                        logger.warn(`please provide an "${state ? 'present' : 'absent'}" webhook url for ${person.name}`)
+                        logger.warn(
+                            `please provide an "${state ? 'present' : 'absent'}" webhook url for ${
+                                person.name
+                            }`
+                        );
                     } else {
-                        request.get(webhook)
-                            .on('response', res => { logger.info(`received status ${res.statusCode}`) })
-                            .on('error', err => { logger.error(`Error triggering webhook: ${err}`) })
+                        request
+                            .get(webhook)
+                            .on('response', res => {
+                                logger.debug(`received status ${res.statusCode}`);
+                            })
+                            .on('error', err => {
+                                logger.error(`Error triggering webhook: ${err}`);
+                            });
                     }
                 }
                 this._handleStateChange();
@@ -92,7 +126,7 @@ class HomeeanPresence extends EventEmitter {
 
             person.track(this.config.interval, this.config.threshold);
             this.persons.push(person);
-        })
+        });
     }
 
     _getPersonByDevice(type, value) {
@@ -100,11 +134,11 @@ class HomeeanPresence extends EventEmitter {
             if (person[type] === value) return person;
         }
 
-        logger.debug(`person not found: ${value} [${type}]`)
+        logger.debug(`person not found: ${value} [${type}]`);
     }
 
     _handleStateChange() {
-        const states = this.persons.map(p =>  p.getState());
+        const states = this.persons.map(p => p.getState());
         const state = states.some(s => s);
 
         // if overall state didn't changed
@@ -114,17 +148,30 @@ class HomeeanPresence extends EventEmitter {
         this.emit('stateChanged', state);
 
         if ('webhooks' in this.config) {
-            logger.info(`${state ? 'somebody' : 'nobody'} @home, triggering webhook for ${state ? 'presence' : 'absence'}`);
+            logger.info(
+                `${state ? 'somebody' : 'nobody'} @home, triggering webhook for ${
+                    state ? 'presence' : 'absence'
+                }`
+            );
             let webhook = this.config.webhooks[state ? 'present' : 'absent'];
 
             if (!webhook) {
-                logger.warn(`please specify an "${state ? 'present' : 'absent'}" webhook in your config file`)
+                logger.warn(
+                    `please specify an "${
+                        state ? 'present' : 'absent'
+                    }" webhook in your config file`
+                );
                 return;
             }
 
-            request.get(webhook)
-                .on('response', res => { logger.info(`received status ${res.statusCode}`) })
-                .on('error', err => { logger.error(`Error triggering webhook: ${err}`) })
+            request
+                .get(webhook)
+                .on('response', res => {
+                    logger.debug(`received status ${res.statusCode}`);
+                })
+                .on('error', err => {
+                    logger.error(`Error triggering webhook: ${err}`);
+                });
         }
     }
 
@@ -134,13 +181,13 @@ class HomeeanPresence extends EventEmitter {
      */
     _loadConfig() {
         const path = os.homedir() + '/.homeean-presence/config.json';
-        logger.info(`load config from ${path}`)
+        logger.info(`load config from ${path}`);
 
         try {
-            const file = fs.readFileSync(path, 'utf8')
+            const file = fs.readFileSync(path, 'utf8');
             this.config = JSON.parse(file);
         } catch (e) {
-            logger.error('Could not find or parse config file')
+            logger.error('Could not find or parse config file');
             process.exit();
         }
     }
