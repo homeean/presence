@@ -1,52 +1,58 @@
 {
-  "name": "homeean-presence",
-  "version": "1.2.1",
-  "description": "presence detection for your smart home",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
-    "start": "nodemon ./src/server.js --exec babel-node --presets babel-preset-env",
-    "build": "babel src -d dist --presets babel-preset-env",
-    "serve": "node dist/server.js"
-  },
-  "keywords": [
-    "presence",
-    "presence-detection"
-  ],
-  "author": "stfnhmplr <info@himpler.com> (https://himpler.com)",
-  "license": "MIT",
-  "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "logplease": "^1.2.15",
-    "arping": "^0.1.0",
-    "raw-socket": "^1.6.4",
-    "noble": "^1.9.1",
-    "request": "^2.87.0",
-    "net-ping": "^1.2.3"
-  },
-  "babel": {
-    "presets": [
-      "env"
-    ]
-  },
-  "devDependencies": {
-    "babel": "^6.23.0",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "chai": "^4.1.2",
-    "mocha": "^5.1.1",
-    "nodemon": "^1.18.3"
-  },
-  "bin": {
-    "homeean-presence": "./bin/cli.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/homeean/presence.git"
-  },
-  "bugs": {
-    "url": "https://github.com/homeean/presence/issues"
-  }
+    "name": "homeean-presence",
+    "version": "1.2.2",
+    "description": "presence detection for your smart home",
+    "main": "index.js",
+    "scripts": {
+        "test": "mocha --compilers js:babel-core/register",
+        "start": "nodemon ./src/server.js --exec babel-node --presets babel-preset-env",
+        "build": "babel src -d dist --presets babel-preset-env",
+        "serve": "node dist/server.js"
+    },
+    "keywords": [
+        "presence",
+        "presence-detection"
+    ],
+    "author": "stfnhmplr <info@himpler.com> (https://himpler.com)",
+    "license": "MIT",
+    "dependencies": {
+        "body-parser": "^1.18.3",
+        "express": "^4.16.3",
+        "logplease": "^1.2.15",
+        "arping": "^0.1.0",
+        "raw-socket": "^1.6.4",
+        "noble": "^1.9.1",
+        "request": "^2.87.0",
+        "net-ping": "^1.2.3"
+    },
+    "babel": {
+        "presets": [
+            "env"
+        ]
+    },
+    "devDependencies": {
+        "babel": "^6.23.0",
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.7.0",
+        "babel-register": "^6.26.0",
+        "chai": "^4.1.2",
+        "mocha": "^5.1.1",
+        "nodemon": "^1.18.3"
+    },
+    "bin": {
+        "homeean-presence": "./bin/cli.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/homeean/presence.git"
+    },
+    "bugs": {
+        "url": "https://github.com/homeean/presence/issues"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "tabWidth": 4,
+        "trailingComma": true,
+        "printWidth": 100
+    }
 }

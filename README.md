@@ -14,12 +14,12 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
 see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/bleno#prerequisites)
 
-### the package is available via npm
+### The package is available via npm
 ```
 sudo npm install -g homeean-presence --unsafe-perm
 ```
 
-### create a config.json in ~/homeean-presence
+### create a config.json in ~/.homeean-presence
 You can add as many person as you wish.
 ```
 {
@@ -46,12 +46,18 @@ You can add as many person as you wish.
 
 ```
 
-## run
+## Run
 ```
 homeean-presence
 ```
 
-## debug
+### Debug
 ```
 LOG_LEVEL=DEBUG homeean-presence
 ```
+
+## Changelog
+
+### 1.2.2 (2019-03-14)
+* fixed timelock issue
+* improved logging

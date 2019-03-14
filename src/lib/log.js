@@ -1,10 +1,10 @@
-import Logger from 'logplease'
-import os from 'os'
+import Logger from 'logplease';
+import os from 'os';
 
-Logger.setLogLevel(process.env.LOG_LEVEL || 'INFO')
+Logger.setLogLevel(process.env.LOG_LEVEL || 'INFO');
 
 export default Logger.create('homeean-presence', {
     filename: os.homedir() + '/.homeean-presence/homeean-presence.log',
     appendFile: false,
-    useLocalTime: true
+    useLocalTime: true,
 });

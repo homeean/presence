@@ -1,8 +1,7 @@
-import logger from './log'
-import EventEmitter from 'events'
+import logger from './log';
+import EventEmitter from 'events';
 
 export default class Person extends EventEmitter {
-
     constructor(config) {
         super();
         this.name = config.name;
@@ -33,7 +32,7 @@ export default class Person extends EventEmitter {
      */
     set name(value) {
         if (typeof value !== 'string') {
-            throw new Error('"name" must be a string')
+            throw new Error('"name" must be a string');
         }
 
         this._name = value;
@@ -52,10 +51,10 @@ export default class Person extends EventEmitter {
      * @param value
      */
     set ble(value) {
-        const pattern = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i
+        const pattern = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i;
 
-        if(!pattern.test(value) && value !== null) {
-            throw new Error('"ble" must be an valid mac address')
+        if (!pattern.test(value) && value !== null) {
+            throw new Error('"ble" must be an valid mac address');
         }
 
         this._ble = value;
@@ -76,7 +75,7 @@ export default class Person extends EventEmitter {
      */
     setState(value, duration = null) {
         if (typeof value !== 'boolean') {
-            throw new Error('"state" must be of type boolean')
+            throw new Error('"state" must be of type boolean');
         }
 
         this.current_state = value;
@@ -85,7 +84,7 @@ export default class Person extends EventEmitter {
         }
 
         if (value !== this.last_state) {
-            this.emit('stateChanged', this, value)
+            this.emit('stateChanged', this, value);
             this.last_state = value;
         }
     }
@@ -95,7 +94,7 @@ export default class Person extends EventEmitter {
      * @returns {Number|number}
      */
     get last_seen() {
-        return this._last_seen
+        return this._last_seen;
     }
 
     /**
@@ -104,10 +103,10 @@ export default class Person extends EventEmitter {
      */
     set last_seen(value) {
         if (typeof value !== 'number') {
-            throw new Error('"last_seen" must be a number (unix time)')
+            throw new Error('"last_seen" must be a number (unix time)');
         }
 
-        this._last_seen = value
+        this._last_seen = value;
     }
 
     /**
@@ -115,7 +114,7 @@ export default class Person extends EventEmitter {
      * @returns {String}
      */
     get ip() {
-        return this._ip
+        return this._ip;
     }
 
     /**
@@ -125,7 +124,7 @@ export default class Person extends EventEmitter {
     set ip(value) {
         const pattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
         if (!pattern.test(value) && value !== null) {
-            throw new Error('"ip" must be a valid ip-adress')
+            throw new Error('"ip" must be a valid ip-adress');
         }
 
         this._ip = value;
@@ -138,14 +137,21 @@ export default class Person extends EventEmitter {
      * @return {void}
      */
     track(interval = 20, threshold = 300) {
-
         setInterval(() => {
             if (this.timelock > Date.now()) {
-                logger.warn(`${this.name}: timelock is active, no state updates until ${new Date(this.timelock).toLocaleString()}`,);
+                logger.warn(
+                    `${this.name}: timelock is active, no state updates until ${new Date(
+                        this.timelock
+                    ).toLocaleString()}`
+                );
                 return;
             }
 
-            logger.info(`${this.name}: last_seen: ${this.last_seen ? new Date(this.last_seen).toLocaleString() : 'never'} [${this.last_device}]`,);
+            logger.info(
+                `${this.name}: last_seen: ${
+                    this.last_seen ? new Date(this.last_seen).toLocaleString() : 'never'
+                } [${this.last_device}]`
+            );
             this.setState(Date.now() < this.last_seen + threshold * 1000);
         }, interval * 1000);
     }
