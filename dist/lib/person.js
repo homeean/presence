@@ -110,7 +110,6 @@ var Person = function (_EventEmitter) {
             var interval = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 20;
             var threshold = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 300;
 
-
             setInterval(function () {
                 if (_this2.timelock > Date.now()) {
                     _log2.default.warn(_this2.name + ': timelock is active, no state updates until ' + new Date(_this2.timelock).toLocaleString());

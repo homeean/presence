@@ -119,15 +119,18 @@ var HomeeanPresence = function (_EventEmitter) {
 
                 _this3.server.post('/homeean-presence/' + person.name.toLowerCase(), function (req, res) {
                     if (typeof req.body.state === 'boolean') {
-                        _log2.default.info('received state ' + req.body.state + ' for ' + person.name);
+                        _log2.default.info('received webhook with state "' + req.body.state + '" for ' + person.name);
                         person.last_seen = Date.now();
                         person.last_device = 'Webhook';
-                        person.timelock = Date.now() + (req.body.duration || 30);
+                        var timelock = req.body.duration || 30;
+                        person.timelock = Date.now() + timelock * 1000;
+                        _log2.default.debug('timelock for ' + timelock + 's until ' + new Date(person.timelock).toLocaleString());
+                        new Date(_this3.timelock).toLocaleString();
                     } else {
                         _log2.default.warn("Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)");
                     }
 
-                    res.send('received state ' + req.body.state + ' for ' + person.name);
+                    res.send('received webhook with state "' + req.body.state + '" for ' + person.name);
                 });
 
                 person.on('stateChanged', function (person, state) {
@@ -141,7 +144,7 @@ var HomeeanPresence = function (_EventEmitter) {
                             _log2.default.warn('please provide an "' + (state ? 'present' : 'absent') + '" webhook url for ' + person.name);
                         } else {
                             _request2.default.get(webhook).on('response', function (res) {
-                                _log2.default.info('received status ' + res.statusCode);
+                                _log2.default.debug('received status ' + res.statusCode);
                             }).on('error', function (err) {
                                 _log2.default.error('Error triggering webhook: ' + err);
                             });
@@ -210,7 +213,7 @@ var HomeeanPresence = function (_EventEmitter) {
                 }
 
                 _request2.default.get(webhook).on('response', function (res) {
-                    _log2.default.info('received status ' + res.statusCode);
+                    _log2.default.debug('received status ' + res.statusCode);
                 }).on('error', function (err) {
                     _log2.default.error('Error triggering webhook: ' + err);
                 });
