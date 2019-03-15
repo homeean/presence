@@ -1,7 +1,6 @@
-const chai = require('chai');
+const { expect } = require('chai');
 import Person from '../src/lib/person';
 
-chai.should();
 let person;
 
 describe('Person', () => {
@@ -16,7 +15,7 @@ describe('Person', () => {
 
     describe('#name', () => {
         it('returns the name', () => {
-            person.name.should.equal('Username');
+            expect(person.name).to.equal('Username');
         });
 
         it('only accepts string values', () => {
@@ -71,6 +70,19 @@ describe('Person', () => {
             (() => {
                 person.ip = '151912985350a';
             }).should.throw(Error);
+        });
+    });
+
+    describe('#state_update', () => {
+        it('it accepts a new state', () => {
+            person.setState(true);
+            person.current_state.should.equal(true);
+        });
+
+        it('it sets a timelock with a given duration', () => {
+            const time = Date.now();
+            person.setState(false, 60);
+            expect(person.timelock).to.be.at.least(time + 60);
         });
     });
 });

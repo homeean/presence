@@ -76,14 +76,7 @@ class HomeeanPresence extends EventEmitter {
                     );
                     person.last_seen = Date.now();
                     person.last_device = 'Webhook';
-                    const timelock = req.body.duration || 30;
-                    person.timelock = Date.now() + timelock * 1000;
-                    logger.debug(
-                        `timelock for ${timelock}s until ${new Date(
-                            person.timelock
-                        ).toLocaleString()}`
-                    );
-                    new Date(this.timelock).toLocaleString();
+                    person.setState(req.body.state, req.body.duration || 30);
                 } else {
                     logger.warn(
                         "Recieved webhook, but can't read state. Please use only values of type Boolean (true/false)"

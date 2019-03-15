@@ -81,6 +81,10 @@ export default class Person extends EventEmitter {
         this.current_state = value;
         if (duration) {
             this.timelock = Date.now() + duration * 1000;
+            logger.debug(
+                `timelock for ${duration}s until ${new Date(this.timelock).toLocaleString()}`
+            );
+            new Date(this.timelock).toLocaleString();
         }
 
         if (value !== this.last_state) {
