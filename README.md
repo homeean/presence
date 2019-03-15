@@ -58,6 +58,9 @@ LOG_LEVEL=DEBUG homeean-presence
 
 ## Changelog
 
+### 1.2.3 (2019-03-15)
+* fixed an issue with state update from webhook
+
 ### 1.2.2 (2019-03-14)
 * fixed timelock issue
 * improved logging
