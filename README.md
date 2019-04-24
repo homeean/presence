@@ -52,11 +52,15 @@ homeean-presence
 ```
 
 ### Debug
+Set the enviroment variable *LOG_LEVEL* to *DEBUG*
 ```
 LOG_LEVEL=DEBUG homeean-presence
 ```
 
 ## Changelog
+
+### 1.2.4 (2019-04-24)
+* improved logging
 
 ### 1.2.3 (2019-03-15)
 * fixed an issue with state update from webhook
