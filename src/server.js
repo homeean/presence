@@ -21,7 +21,7 @@ class HomeeanPresence extends EventEmitter {
 
     run() {
         logger.info('homeean-presence');
-        logger.info('2018 by stfnhmplr | homeean.de');
+        logger.info('2018-2019 by stfnhmplr | homeean.de');
         logger.info(`running on node ${process.version}`);
 
         try {
@@ -71,7 +71,7 @@ class HomeeanPresence extends EventEmitter {
 
             this.server.post('/homeean-presence/' + person.name.toLowerCase(), (req, res) => {
                 if (typeof req.body.state === 'boolean') {
-                    logger.info(
+                    logger.debug(
                         `received webhook with state "${req.body.state}" for ${person.name}`
                     );
                     person.last_seen = Date.now();
@@ -87,10 +87,10 @@ class HomeeanPresence extends EventEmitter {
             });
 
             person.on('stateChanged', (person, state) => {
-                logger.info(`${person.name} is ${state ? 'present' : 'absent'}.`);
+                logger.debug(`${person.name} is ${state ? 'present' : 'absent'}.`);
 
                 if (person.webhooks) {
-                    logger.info(
+                    logger.debug(
                         `${person.name} ${
                             state ? 'is' : 'is not'
                         } @home, triggering persons webhook for ${state ? 'presence' : 'absence'}`
@@ -98,7 +98,7 @@ class HomeeanPresence extends EventEmitter {
                     let webhook = person.webhooks[state ? 'present' : 'absent'];
 
                     if (!webhook) {
-                        logger.warn(
+                        logger.debug(
                             `please provide an "${state ? 'present' : 'absent'}" webhook url for ${
                                 person.name
                             }`
@@ -149,7 +149,7 @@ class HomeeanPresence extends EventEmitter {
             let webhook = this.config.webhooks[state ? 'present' : 'absent'];
 
             if (!webhook) {
-                logger.warn(
+                logger.debug(
                     `please specify an "${
                         state ? 'present' : 'absent'
                     }" webhook in your config file`

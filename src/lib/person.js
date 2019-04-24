@@ -151,7 +151,7 @@ export default class Person extends EventEmitter {
                 return;
             }
 
-            logger.info(
+            logger.debug(
                 `${this.name}: last_seen: ${
                     this.last_seen ? new Date(this.last_seen).toLocaleString() : 'never'
                 } [${this.last_device}]`
