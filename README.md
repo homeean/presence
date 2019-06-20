@@ -23,8 +23,8 @@ sudo npm install -g homeean-presence --unsafe-perm
 You can add as many person as you wish.
 ```
 {
-    "interval": 20,"
-    threshold": 300,
+    "interval": 20,
+    "threshold": 300,
     "port": 3000,
     "webhooks": {
         "absent": "https://webhook-for-absence",
