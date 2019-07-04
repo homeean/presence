@@ -22,37 +22,41 @@ export default class Scanner extends EventEmitter {
     }
 
     _bleScan() {
-        noble.on('discover', bleacon => {
-            const mac = bleacon.address.toUpperCase();
-            if (this.bles.indexOf(mac) === -1) return;
+        if (this.bles.length > 0) {
+            noble.on('discover', bleacon => {
+                const mac = bleacon.address.toUpperCase();
+                if (this.bles.indexOf(mac) === -1) return;
 
-            logger.debug(`discovered ${mac}`);
-            this.emit('discover', 'ble', mac);
-        });
+                logger.debug(`discovered ${mac}`);
+                this.emit('discover', 'ble', mac);
+            });
 
-        noble.on('scanStart', () => {
-            logger.debug(`BLE Scan started`);
-        });
+            noble.on('scanStart', () => {
+                logger.debug(`BLE Scan started`);
+            });
 
-        noble.on('scanStop', () => {
-            logger.debug('BLE Scan stopped');
-        });
+            noble.on('scanStop', () => {
+                logger.debug('BLE Scan stopped');
+            });
 
-        noble.on('warning', message => {
-            logger.warn(message);
-        });
+            noble.on('warning', message => {
+                logger.warn(message);
+            });
 
-        setInterval(() => {
-            try {
-                noble.startScanning();
-            } catch (err) {
-                logger.error(`ble scan error: ${err.message}`);
-            }
+            setInterval(() => {
+                try {
+                    noble.startScanning();
+                } catch (err) {
+                    logger.error(`ble scan error: ${err.message}`);
+                }
 
-            setTimeout(() => {
-                noble.stopScanning();
-            }, this.interval / 2);
-        }, this.interval);
+                setTimeout(() => {
+                    noble.stopScanning();
+                }, this.interval / 2);
+            }, this.interval);
+        } else {
+            logger.debug('No BLE devices configured. Skipping scan.');
+        }
     }
 
     _ping() {
