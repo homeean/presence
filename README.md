@@ -8,20 +8,20 @@ If the status changes, a webhook can be triggered.
 
 ### Raspbian/Debian/Ubuntu
 
-```
+```sh
 sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev libpcap-dev
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
 see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/bleno#prerequisites)
 
 ### The package is available via npm
-```
+```sh
 sudo npm install -g homeean-presence --unsafe-perm
 ```
 
 ### create a config.json in ~/.homeean-presence
 You can add as many person as you wish.
-```
+```json
 {
     "interval": 20,
     "threshold": 300,
@@ -47,9 +47,22 @@ You can add as many person as you wish.
 ```
 
 ## Run
-```
+```sh
 homeean-presence
 ```
+
+## Run in Docker
+```sh
+# Put your config.json in the repository root!
+
+# Build the image
+docker build -t homeean-presence:latest .
+
+# Run the image
+docker run -it --net=host --name homeean-presence homeean-presence:latest
+```
+*Attention: **--net=host** is required by the container to have access to the host subnet and bluetooth devices.*
+
 
 ### Debug
 Set the enviroment variable *LOG_LEVEL* to *DEBUG*
