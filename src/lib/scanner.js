@@ -18,7 +18,11 @@ export default class Scanner extends EventEmitter {
             .join('.');
 
         this._ping();
-        this._bleScan();
+        if (this.bles.length > 0) {
+            this._bleScan();
+        } else {
+            logger.debug('No BLE devices configured. Skipping BLE scans.');
+        }
     }
 
     _bleScan() {
