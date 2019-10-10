@@ -1,5 +1,7 @@
 # homeean-presence
 
+**this repository is no longer actively maintained**
+
 homeean-presence provides a simple way to detect presence at your home. For each person an IP device in the same network and a BLE device can be monitored. In addition, the presence state of a person can be manually set for a certain time via webhook.
 
 If the status changes, a webhook can be triggered.
