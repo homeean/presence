@@ -21,7 +21,7 @@ class HomeeanPresence extends EventEmitter {
 
     run() {
         logger.info('homeean-presence');
-        logger.info('2018-2019 by stfnhmplr | homeean.de');
+        logger.info('2018-2019 by stfnhmplr | himpler.com');
         logger.info(`running on node ${process.version}`);
 
         try {

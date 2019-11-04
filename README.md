@@ -74,6 +74,9 @@ LOG_LEVEL=DEBUG homeean-presence
 
 ## Changelog
 
+### 1.3.0 (2019-11-04)
+* added support for nodejs v. 10
+
 ### 1.2.4 (2019-04-24)
 * improved logging
 

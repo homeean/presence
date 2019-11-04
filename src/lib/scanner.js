@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import noble from 'noble';
+import noble from '@abandonware/noble';
 import logger from './log';
 import arping from 'arping';
 import ping from 'net-ping';
