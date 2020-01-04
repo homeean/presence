@@ -21,6 +21,9 @@ see [https://github.com/noble/bleno#prerequisites](https://github.com/noble/blen
 sudo npm install -g homeean-presence --unsafe-perm
 ```
 
+If you encounter problems with premissions, see here: [https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally](If you encounter problems with access rights, see here: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally)
+
+
 ### create a config.json in ~/.homeean-presence
 You can add as many person as you wish.
 ```json
